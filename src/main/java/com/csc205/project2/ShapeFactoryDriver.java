@@ -6,21 +6,21 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 
-public class ShapeDriver {
+public class ShapeFactoryDriver {
 
     public static void main(String[] args) {
         Scanner scanner = new Scanner(System.in);
         List<Shape3D> userShapes = new ArrayList<>();
 
         System.out.println("=================================================");
-        System.out.println("          3D SHAPE ANALYZER & DRIVER             ");
+        System.out.println("      3D SHAPE ANALYZER (FACTORY EDITION)        ");
         System.out.println("=================================================");
 
-        // 1. Interactive Features
+        // 1. Interactive Features using the Factory
         System.out.println("\n--- Part 1: Interactive Shape Creation ---");
         boolean keepBuilding = true;
         while (keepBuilding) {
-            System.out.println("\nChoose a shape to create:");
+            System.out.println("\nChoose a shape to create via the Factory:");
             System.out.println("1) Sphere  2) Cube  3) Cylinder  4) Rectangular Prism  5) Tetrahedron  6) Skip to Analysis");
             System.out.print("Selection: ");
             String choice = scanner.nextLine();
@@ -33,24 +33,24 @@ public class ShapeDriver {
             try {
                 Shape3D newShape = null;
 
-                // Handle shape-specific dimensions first
+                // Notice how we use ShapeFactory.create() instead of the 'new' keyword
                 switch (choice) {
                     case "1":
                         System.out.print("Enter radius for the Sphere: ");
                         double radius = Double.parseDouble(scanner.nextLine());
-                        newShape = new Sphere(radius, "");
+                        newShape = ShapeFactory.create(Sphere.class, "", radius);
                         break;
                     case "2":
                         System.out.print("Enter side length for the Cube: ");
                         double side = Double.parseDouble(scanner.nextLine());
-                        newShape = new Cube(side, "");
+                        newShape = ShapeFactory.create(Cube.class, "", side);
                         break;
                     case "3":
                         System.out.print("Enter radius for the Cylinder: ");
                         double cylRadius = Double.parseDouble(scanner.nextLine());
                         System.out.print("Enter height for the Cylinder: ");
                         double cylHeight = Double.parseDouble(scanner.nextLine());
-                        newShape = new Cylinder(cylRadius, cylHeight, "");
+                        newShape = ShapeFactory.create(Cylinder.class, "", cylRadius, cylHeight);
                         break;
                     case "4":
                         System.out.print("Enter length for the Prism: ");
@@ -59,42 +59,43 @@ public class ShapeDriver {
                         double width = Double.parseDouble(scanner.nextLine());
                         System.out.print("Enter height for the Prism: ");
                         double height = Double.parseDouble(scanner.nextLine());
-                        newShape = new RectangularPrism(length, width, height, "");
+                        newShape = ShapeFactory.create(RectangularPrism.class, "", length, width, height);
                         break;
                     case "5":
                         System.out.print("Enter side length for the Tetrahedron: ");
                         double tetSide = Double.parseDouble(scanner.nextLine());
-                        newShape = new Tetrahedron(tetSide, "");
+                        newShape = ShapeFactory.create(Tetrahedron.class, "", tetSide);
                         break;
                     default:
                         System.out.println("Invalid selection. Try again.");
-                        continue; // Skip the rest of the loop and start over
+                        continue;
                 }
 
-                // If a shape was successfully created, prompt for common properties
+                // If the factory successfully built the shape, apply properties
                 if (newShape != null) {
-                    System.out.print("Enter a color for your shape: ");
-                    String color = scanner.nextLine();
-                    newShape.setColor(color);
-
                     System.out.print("Enter a custom name (or press Enter to keep default '" + newShape.getName() + "'): ");
                     String customName = scanner.nextLine();
                     if (!customName.trim().isEmpty()) {
                         newShape.setName(customName);
                     }
 
+                    System.out.print("Enter a color for your shape: ");
+                    String color = scanner.nextLine();
+                    newShape.setColor(color);
+
                     userShapes.add(newShape);
-                    System.out.println("--> Successfully added " + newShape.getColor() + " " + newShape.getName() + "!");
+                    System.out.println("--> Factory successfully built a " + newShape.getColor() + " " + newShape.getName() + "!");
                 }
 
             } catch (NumberFormatException e) {
                 System.out.println("Please enter a valid number.");
             } catch (IllegalArgumentException e) {
-                System.out.println("Error: " + e.getMessage());
+                // This catches the validation errors thrown by our Factory!
+                System.out.println("Factory Error: " + e.getMessage());
             }
         }
 
-        // 2. Polymorphism & Formatted Output
+        // 2. Polymorphic & Formatted Output
         System.out.println("\n--- Part 2: Polymorphic Printing ---");
         System.out.println("Your Custom Shapes:");
         if (userShapes.isEmpty()) {
@@ -110,13 +111,28 @@ public class ShapeDriver {
         System.out.println("Constraint: If all primary dimensions (radius, side, length) equal 5.0...");
 
         List<Shape3D> constraintShapes = new ArrayList<>();
-        constraintShapes.add(new Sphere(5.0, "Cyan"));
-        constraintShapes.add(new Cube(5.0, "Magenta"));
-        constraintShapes.add(new Cylinder(5.0, 5.0, "Yellow"));
-        constraintShapes.add(new RectangularPrism(5.0, 5.0, 5.0, "Black"));
-        constraintShapes.add(new Tetrahedron(5.0, "White"));
 
-        // Initialize trackers with the first element
+        // Creating the baseline shapes using the Factory
+        Shape3D s1 = ShapeFactory.create(Sphere.class, "Constraint Sphere", 5.0);
+        s1.setColor("Cyan");
+        constraintShapes.add(s1);
+
+        Shape3D s2 = ShapeFactory.create(Cube.class, "Constraint Cube", 5.0);
+        s2.setColor("Magenta");
+        constraintShapes.add(s2);
+
+        Shape3D s3 = ShapeFactory.create(Cylinder.class, "Constraint Cylinder", 5.0, 5.0);
+        s3.setColor("Yellow");
+        constraintShapes.add(s3);
+
+        Shape3D s4 = ShapeFactory.create(RectangularPrism.class, "Constraint Prism", 5.0, 5.0, 5.0);
+        s4.setColor("Black");
+        constraintShapes.add(s4);
+
+        Shape3D s5 = ShapeFactory.create(Tetrahedron.class, "Constraint Tetra", 5.0);
+        s5.setColor("White");
+        constraintShapes.add(s5);
+
         Shape3D largestVolumeShape = constraintShapes.get(0);
         Shape3D largestSurfaceAreaShape = constraintShapes.get(0);
         Shape3D mostEfficientShape = constraintShapes.get(0);
@@ -130,13 +146,15 @@ public class ShapeDriver {
             double sa = shape.getSurfaceArea();
             double efficiency = vol / sa;
 
+            // Trim the name slightly for the table if it's too long
+            String displayName = shape.getName().replace("Constraint ", "");
+
             System.out.printf("%-20s %-15.4f %-15.4f %-20.4f%n",
-                    shape.getName(),
+                    displayName,
                     sa,
                     vol,
                     efficiency);
 
-            // Check for new maximums
             if (vol > largestVolumeShape.getVolume()) {
                 largestVolumeShape = shape;
             }
@@ -163,7 +181,6 @@ public class ShapeDriver {
         double dummyTotal = 0;
         for (int i = 0; i < 1_000_000; i++) {
             for (Shape3D shape : constraintShapes) {
-                // Calling the polymorphic method
                 dummyTotal += shape.getVolume();
             }
         }
